@@ -29,18 +29,19 @@ Inspiração: Scout, da CoinFabrik, que faz detecção estática para contratos 
 
 ## 3. Usuários
 
-| Persona | Necessidade |
-| :- | :- |
-| Dev portando um contrato EVM para a Arc | Saber em minutos o que revisar, com o link do doc |
-| Time com CI | Barrar merge quando entra um padrão que quebra na Arc |
-| Recém-chegado à Arc | Colar um contrato numa página e entender as diferenças |
-| Revisor ou auditor | Exportar achados em formato de máquina |
+| Persona                                 | Necessidade                                            |
+| :-------------------------------------- | :----------------------------------------------------- |
+| Dev portando um contrato EVM para a Arc | Saber em minutos o que revisar, com o link do doc      |
+| Time com CI                             | Barrar merge quando entra um padrão que quebra na Arc  |
+| Recém-chegado à Arc                     | Colar um contrato numa página e entender as diferenças |
+| Revisor ou auditor                      | Exportar achados em formato de máquina                 |
 
 ## 4. Histórias de usuário
 
 Prioridade: P1 é o MVP; P2 entra em seguida; P3 fica registrado.
 
 ### US1 (P1) — Verificar um projeto pela linha de comando
+
 Como dev, quero rodar um comando na raiz do projeto e ver os achados por arquivo e linha.
 
 - **Dado** um diretório com arquivos `.sol`, **quando** rodo `arc-porter check`, **então** vejo cada achado com regra, severidade, confiança, arquivo, linha, explicação curta e link do doc.
@@ -49,30 +50,35 @@ Como dev, quero rodar um comando na raiz do projeto e ver os achados por arquivo
 - **Dado** um arquivo que não pode ser lido como Solidity, **então** o erro nomeia o arquivo, os demais são analisados e o código de saída é 2.
 
 ### US2 (P1) — Saída para máquinas
+
 Como revisor, quero JSON e SARIF para integrar com outras ferramentas.
 
 - **Dado** `--format json`, **então** a saída segue o esquema de `plan.md` e é idêntica entre execuções com a mesma entrada.
 - **Dado** `--format sarif`, **então** o arquivo é aceito pelo upload de code scanning do GitHub.
 
 ### US3 (P1) — Barrar no CI
+
 Como time, quero uma GitHub Action que anote o PR e falhe em achados graves.
 
 - **Dado** um PR que introduz `block.prevrandao`, **quando** a Action roda, **então** o job falha e a linha aparece anotada.
 - **Dado** `fail-on: high`, **então** achados médios e baixos aparecem sem falhar o job.
 
 ### US4 (P2) — Verificar pelo navegador
+
 Como recém-chegado, quero colar um contrato e ver o relatório sem instalar nada.
 
 - **Dado** um contrato colado, **então** o relatório aparece sem nenhuma requisição de rede com o código.
 - **Dado** um exemplo pronto escolhido na página, **então** vejo os achados e a explicação de cada regra.
 
 ### US5 (P2) — Aceitar um achado com justificativa
+
 Como mantenedor, quero suprimir um achado específico registrando o motivo.
 
 - **Dado** uma supressão no arquivo de configuração com regra, arquivo e motivo, **então** o achado some da contagem e aparece em uma seção "suprimidos".
 - **Dado** uma supressão sem motivo, **então** a configuração é rejeitada.
 
 ### US6 (P3) — Regras para scripts fora da chain
+
 Como dev, quero avisos em scripts TypeScript de deploy, como preço de gas abaixo do piso.
 
 ## 5. Requisitos funcionais
@@ -94,21 +100,21 @@ Como dev, quero avisos em scripts TypeScript de deploy, como preço de gas abaix
 
 Severidade: impacto se o padrão for real. Confiança: quão seguro é o casamento sintático.
 
-| ID | Regra | O que dispara | Sev. | Conf. | Fonte |
-| :- | :- | :- | :- | :- | :- |
-| AP001 | prevrandao-randomness | Uso de `block.prevrandao` ou `block.difficulty` | Alta | Alta | evm-differences, porting passo 6 |
-| AP002 | native-erc20-decimal-mix | Mesma função usa `msg.value` ou `.balance` junto com `balanceOf`, `transfer` ou `transferFrom` de token | Alta | Média | stablecoin-native-model, porting passo 1 |
-| AP003 | usdc-18-decimals | Endereço `0x3600…0000` no arquivo junto com escala `1e18` ou unidade `ether` aplicada a valores de token | Alta | Média | contract-addresses |
-| AP004 | value-to-zero-address | Envio de valor ou `transfer` de token para `address(0)` literal | Alta | Alta | evm-differences, regras de transferência |
-| AP005 | push-payment-loop | `call{value:}`, `.transfer`, `.send` ou `transfer` de token dentro de laço | Média | Alta | porting passos 2 e 8 |
-| AP006 | selfdestruct-usage | Qualquer `selfdestruct` | Alta | Alta | evm-differences, SELFDESTRUCT |
-| AP007 | wrapped-native-pattern | Identificadores `WETH`, `IWETH`, `WUSDC`, ou `deposit{value:}` seguido de `withdraw(uint)` | Média | Média | porting passo 4 |
-| AP008 | native-asset-sentinel | Literal `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` | Média | Alta | stablecoin-native-model |
-| AP009 | native-balance-sweep | Envio de `address(this).balance` em contrato que também opera token ERC-20 | Alta | Média | porting passo 3 |
-| AP010 | zero-balance-check | `balanceOf(...) == 0` usado como condição | Baixa | Baixa | porting passo 1 |
-| AP011 | blob-opcodes | `blobhash(...)` ou `block.blobbasefee` | Média | Alta | evm-differences, tabela de opcodes |
-| AP012 | beacon-roots | Endereço do contrato EIP-4788 `0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02` | Média | Alta | evm-differences, tabela de opcodes |
-| AP013 | timestamp-strict-ordering | Comparação `block.timestamp >` contra timestamp guardado, usada para exigir bloco posterior | Baixa | Baixa | evm-differences, comportamento de bloco |
+| ID    | Regra                     | O que dispara                                                                                            | Sev.  | Conf. | Fonte                                    |
+| :---- | :------------------------ | :------------------------------------------------------------------------------------------------------- | :---- | :---- | :--------------------------------------- |
+| AP001 | prevrandao-randomness     | Uso de `block.prevrandao` ou `block.difficulty`                                                          | Alta  | Alta  | evm-differences, porting passo 6         |
+| AP002 | native-erc20-decimal-mix  | Mesma função usa `msg.value` ou `.balance` junto com `balanceOf`, `transfer` ou `transferFrom` de token  | Alta  | Média | stablecoin-native-model, porting passo 1 |
+| AP003 | usdc-18-decimals          | Endereço `0x3600…0000` no arquivo junto com escala `1e18` ou unidade `ether` aplicada a valores de token | Alta  | Média | contract-addresses                       |
+| AP004 | value-to-zero-address     | Envio de valor ou `transfer` de token para `address(0)` literal                                          | Alta  | Alta  | evm-differences, regras de transferência |
+| AP005 | push-payment-loop         | `call{value:}`, `.transfer`, `.send` ou `transfer` de token dentro de laço                               | Média | Alta  | porting passos 2 e 8                     |
+| AP006 | selfdestruct-usage        | Qualquer `selfdestruct`                                                                                  | Alta  | Alta  | evm-differences, SELFDESTRUCT            |
+| AP007 | wrapped-native-pattern    | Identificadores `WETH`, `IWETH`, `WUSDC`, ou `deposit{value:}` seguido de `withdraw(uint)`               | Média | Média | porting passo 4                          |
+| AP008 | native-asset-sentinel     | Literal `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE`                                                     | Média | Alta  | stablecoin-native-model                  |
+| AP009 | native-balance-sweep      | Envio de `address(this).balance` em contrato que também opera token ERC-20                               | Alta  | Média | porting passo 3                          |
+| AP010 | zero-balance-check        | `balanceOf(...) == 0` usado como condição                                                                | Baixa | Baixa | porting passo 1                          |
+| AP011 | blob-opcodes              | `blobhash(...)` ou `block.blobbasefee`                                                                   | Média | Alta  | evm-differences, tabela de opcodes       |
+| AP012 | beacon-roots              | Endereço do contrato EIP-4788 `0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02`                               | Média | Alta  | evm-differences, tabela de opcodes       |
+| AP013 | timestamp-strict-ordering | Comparação `block.timestamp >` contra timestamp guardado, usada para exigir bloco posterior              | Baixa | Baixa | evm-differences, comportamento de bloco  |
 
 Regras previstas para depois do MVP (US6): `gas-price-below-floor` (piso de 20 Gwei), `confirmation-wait` (finalidade em uma confirmação), `usdc-variant-naming` (`USDC.e`, `wUSDC`).
 

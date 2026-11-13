@@ -4,15 +4,15 @@ Feature: `001-arc-porter` · Depende de: `spec.md` aprovado · Data: 13/11/2026
 
 ## 1. Decisões técnicas
 
-| Decisão | Escolha | Motivo |
-| :- | :- | :- |
-| Linguagem | TypeScript, Node 20+ | Mesmo núcleo roda na CLI, na Action e no navegador |
-| Leitura do Solidity | `@solidity-parser/parser` | JavaScript puro, não exige compilar nem resolver imports (FR-002), roda no navegador (FR-011) |
-| Repositório | Monorepo pnpm | Núcleo, CLI, Action e web versionados juntos |
-| Testes | Vitest | Rápido e com snapshots para as saídas |
-| Empacotamento | tsup (CLI e núcleo), ncc (Action) | Um arquivo por alvo, sem dependência nativa |
-| Web | Vite + React, página estática na Vercel | Sem servidor: o código colado não sai do navegador |
-| Formato de CI | SARIF 2.1.0 | Aceito pelo code scanning do GitHub |
+| Decisão             | Escolha                                 | Motivo                                                                                        |
+| :------------------ | :-------------------------------------- | :-------------------------------------------------------------------------------------------- |
+| Linguagem           | TypeScript, Node 20+                    | Mesmo núcleo roda na CLI, na Action e no navegador                                            |
+| Leitura do Solidity | `@solidity-parser/parser`               | JavaScript puro, não exige compilar nem resolver imports (FR-002), roda no navegador (FR-011) |
+| Repositório         | Monorepo pnpm                           | Núcleo, CLI, Action e web versionados juntos                                                  |
+| Testes              | Vitest                                  | Rápido e com snapshots para as saídas                                                         |
+| Empacotamento       | tsup (CLI e núcleo), ncc (Action)       | Um arquivo por alvo, sem dependência nativa                                                   |
+| Web                 | Vite + React, página estática na Vercel | Sem servidor: o código colado não sai do navegador                                            |
+| Formato de CI       | SARIF 2.1.0                             | Aceito pelo code scanning do GitHub                                                           |
 
 Alternativa descartada para o MVP: detectores do Slither. Exigem Python e compilação do projeto, e não rodam no navegador. Ficam para a feature `002`, já decidida.
 
@@ -148,14 +148,14 @@ Comportamento: gera o relatório, escreve anotações por linha e falha conforme
 
 ## 8. Estratégia de testes
 
-| Camada | O que cobre |
-| :- | :- |
-| Exemplos por regra | `bad/` deve disparar a regra; `good/` não pode disparar nenhuma (SC-001) |
-| Snapshots de saída | Texto, JSON e SARIF estáveis |
-| Validação de SARIF | Esquema 2.1.0 |
-| Corpus | `arc-milestone-escrow` sem achado alto (SC-002); `UniswapV2Router02` dispara AP007 (SC-003); apps de exemplo oficiais rodam sem falhar (SC-004) |
-| CLI | Códigos de saída e mensagens de erro |
-| Configuração | Regras desligadas, severidade alterada, supressão com e sem motivo |
+| Camada             | O que cobre                                                                                                                                     |
+| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exemplos por regra | `bad/` deve disparar a regra; `good/` não pode disparar nenhuma (SC-001)                                                                        |
+| Snapshots de saída | Texto, JSON e SARIF estáveis                                                                                                                    |
+| Validação de SARIF | Esquema 2.1.0                                                                                                                                   |
+| Corpus             | `arc-milestone-escrow` sem achado alto (SC-002); `UniswapV2Router02` dispara AP007 (SC-003); apps de exemplo oficiais rodam sem falhar (SC-004) |
+| CLI                | Códigos de saída e mensagens de erro                                                                                                            |
+| Configuração       | Regras desligadas, severidade alterada, supressão com e sem motivo                                                                              |
 
 Ordem obrigatória: exemplos primeiro, regra depois (princípio 2).
 
@@ -165,22 +165,22 @@ Ordem obrigatória: exemplos primeiro, regra depois (princípio 2).
 
 ## 10. Riscos
 
-| Risco | Mitigação |
-| :- | :- |
-| Falsos positivos cansam o usuário | Confiança exposta, `--fail-on high` por padrão, AP010 e AP013 como baixas |
-| Docs da Arc mudam | Rotina da seção 9 e data das fontes no relatório |
-| Parser não cobre sintaxe nova do Solidity | Erro por arquivo sem derrubar a execução; teste com o corpus |
-| Confundirem com auditoria | Aviso em todo relatório e no README |
-| Sobreposição com ferramenta oficial futura | Regras portáveis para Slither na feature `002` |
+| Risco                                      | Mitigação                                                                 |
+| :----------------------------------------- | :------------------------------------------------------------------------ |
+| Falsos positivos cansam o usuário          | Confiança exposta, `--fail-on high` por padrão, AP010 e AP013 como baixas |
+| Docs da Arc mudam                          | Rotina da seção 9 e data das fontes no relatório                          |
+| Parser não cobre sintaxe nova do Solidity  | Erro por arquivo sem derrubar a execução; teste com o corpus              |
+| Confundirem com auditoria                  | Aviso em todo relatório e no README                                       |
+| Sobreposição com ferramenta oficial futura | Regras portáveis para Slither na feature `002`                            |
 
 ## 11. Entregas por fase
 
-| Fase | Entrega | Critério de pronto |
-| :- | :- | :- |
-| A | Núcleo com motor, 4 regras de alta confiança (AP001, AP004, AP006, AP008) e saída em texto | SC-001 para essas regras |
-| B | Regras restantes, JSON, SARIF, configuração e supressões | SC-001 a SC-004 |
-| C | CLI publicada e GitHub Action | US1 a US3 aceitas; SC-005 |
-| D | Versão web | US4 aceita |
-| E | Rotina de fontes e documentação das regras | FR-012 |
+| Fase | Entrega                                                                                    | Critério de pronto        |
+| :--- | :----------------------------------------------------------------------------------------- | :------------------------ |
+| A    | Núcleo com motor, 4 regras de alta confiança (AP001, AP004, AP006, AP008) e saída em texto | SC-001 para essas regras  |
+| B    | Regras restantes, JSON, SARIF, configuração e supressões                                   | SC-001 a SC-004           |
+| C    | CLI publicada e GitHub Action                                                              | US1 a US3 aceitas; SC-005 |
+| D    | Versão web                                                                                 | US4 aceita                |
+| E    | Rotina de fontes e documentação das regras                                                 | FR-012                    |
 
 Estimativa do autor da spec, para uma pessoa: A 2 dias, B 3 dias, C 2 dias, D 2 dias, E 1 dia.

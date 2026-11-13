@@ -1,0 +1,29 @@
+{
+  "name": "arc-porter",
+  "version": "0.1.0",
+  "description": "Static checker that flags Solidity code that breaks or behaves differently on Arc",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "arc-porter": "./dist/main.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@arc-porter/core": "workspace:*",
+    "commander": "^15.1.0",
+    "fast-glob": "^3.3.3",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "tsup": "^9.0.0"
+  }
+}
