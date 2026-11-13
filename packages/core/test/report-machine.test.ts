@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Ajv } from "ajv";
 import { describe, expect, it } from "vitest";
 import { defaultConfig, resolveConfig } from "../src/config.js";
@@ -54,7 +55,9 @@ describe("sarif report", () => {
   });
 
   it("validates against the SARIF 2.1.0 schema", () => {
-    const schema = JSON.parse(readFileSync(join(import.meta.dirname, "schemas", "sarif-2.1.0.json"), "utf8"));
+    const schema = JSON.parse(
+      readFileSync(fileURLToPath(new URL("./schemas/sarif-2.1.0.json", import.meta.url)), "utf8"),
+    );
     const ajv = new Ajv({ strict: false, allErrors: true, validateFormats: false });
     const validate = ajv.compile(schema);
     const sarif = toSarif(sampleReport());
@@ -81,7 +84,9 @@ describe("sarif report", () => {
   });
 
   it("validates an empty report too", () => {
-    const schema = JSON.parse(readFileSync(join(import.meta.dirname, "schemas", "sarif-2.1.0.json"), "utf8"));
+    const schema = JSON.parse(
+      readFileSync(fileURLToPath(new URL("./schemas/sarif-2.1.0.json", import.meta.url)), "utf8"),
+    );
     const ajv = new Ajv({ strict: false, allErrors: true, validateFormats: false });
     const validate = ajv.compile(schema);
     expect(validate(toSarif(analyze([], defaultConfig(rules))))).toBe(true);

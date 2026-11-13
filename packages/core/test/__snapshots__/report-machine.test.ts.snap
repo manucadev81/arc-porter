@@ -125,9 +125,9 @@ exports[`sarif report > matches the snapshot 1`] = `
                 "text": "On Arc msg.value and address.balance are denominated in 18-decimal native USDC, while balanceOf, transfer and transferFrom on the USDC contract use 6 decimals over the same balance. A function that reads or moves both is off by a factor of 10^12 unless it converts."
               },
               "help": {
-                "text": "Pick one interface per function. If both are needed, convert explicitly: native = erc20 * 10**12, and never compare or add raw values.\\n\\nSource: https://docs.arc.io/arc/concepts/stablecoin-native-model#usdc-as-the-native-token"
+                "text": "Pick one interface per function. If both are needed, convert explicitly: native = erc20 * 10**12, and never compare or add raw values.\\n\\nSource: https://docs.arc.io/arc/concepts/stablecoin-native-model#two-interfaces-one-balance"
               },
-              "helpUri": "https://docs.arc.io/arc/concepts/stablecoin-native-model#usdc-as-the-native-token",
+              "helpUri": "https://docs.arc.io/arc/concepts/stablecoin-native-model#two-interfaces-one-balance",
               "defaultConfiguration": {
                 "level": "error"
               },
@@ -197,7 +197,7 @@ exports[`sarif report > matches the snapshot 1`] = `
                 "text": "Transfer inside a loop can be blocked by one recipient"
               },
               "fullDescription": {
-                "text": "On Arc a USDC transfer can revert even when the sender has the balance: the recipient may be blocklisted, the zero address or a self-destructed account. A loop that pushes value to several recipients fails for everyone when one of them reverts."
+                "text": "On Arc a USDC transfer can revert even when the sender has the balance: the recipient may be blocklisted, the zero address or a self-destructed account. A loop that pushes value to several recipients fails for everyone when one of them reverts. This rule is derived from the value-transfer and revert-path steps of the porting guide; the guide does not name loops explicitly."
               },
               "help": {
                 "text": "Credit each recipient in storage and let them withdraw individually, so one address that cannot receive USDC does not block the others.\\n\\nSource: https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps"
@@ -247,10 +247,10 @@ exports[`sarif report > matches the snapshot 1`] = `
                 "text": "WETH-style wrapper has no place on Arc"
               },
               "fullDescription": {
-                "text": "Arc's native asset already exposes an ERC-20 interface, so there is no wrapped native token and no WUSDC. Code that names WETH or WUSDC, or wraps with deposit{value:} and unwraps with withdraw(), carries a step that does not exist on Arc and fragments liquidity if deployed."
+                "text": "Arc's native asset already exposes an ERC-20 interface, so there is no wrapped native token and no WUSDC. Code that names WETH, IWETH or WUSDC, or wraps with deposit{value:} and unwraps with withdraw(), usually carries a wrap step that does not exist on Arc. A WETH reference can also be the bridged WETH ERC-20 that Arc lists on its contract addresses page; that one is a plain token and is fine."
               },
               "help": {
-                "text": "Replace the WETH constant with the USDC ERC-20 address 0x3600000000000000000000000000000000000000 and remove deposit() and withdraw() wrap calls.\\n\\nSource: https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps"
+                "text": "If this wraps the native asset, replace it with the USDC ERC-20 address 0x3600000000000000000000000000000000000000 and remove deposit() and withdraw() wrap calls. If it is Arc's bridged WETH used as an ordinary ERC-20, suppress this finding with that reason.\\n\\nSource: https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps"
               },
               "helpUri": "https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps",
               "defaultConfiguration": {
@@ -269,15 +269,15 @@ exports[`sarif report > matches the snapshot 1`] = `
               "id": "AP008",
               "name": "native-asset-sentinel",
               "shortDescription": {
-                "text": "EIP-7528 native-asset sentinel must not alias Arc's USDC"
+                "text": "EIP-7528 native-asset sentinel must not be aliased to Arc's USDC"
               },
               "fullDescription": {
-                "text": "DeFi SDKs use 0xEeee...EEeE as a stand-in for native ETH in routing tables. On Arc the native asset is USDC and already has an ERC-20 interface, so aliasing the sentinel to the USDC address conflates native value transfers with ERC-20 transfers."
+                "text": "DeFi SDKs use 0xEeee...EEeE as a stand-in for the native asset in routing tables. Arc's docs say not to alias that sentinel to the USDC ERC-20 address 0x3600...0000: the two interfaces move the same balance with different decimals, so treating the sentinel as another name for USDC conflates native value transfers with ERC-20 transfers."
               },
               "help": {
-                "text": "Use the USDC ERC-20 address 0x3600000000000000000000000000000000000000 directly instead of a native-asset sentinel.\\n\\nSource: https://docs.arc.io/arc/concepts/stablecoin-native-model#usdc-as-the-native-token"
+                "text": "Keep the sentinel for native value paths only; never map it to 0x3600000000000000000000000000000000000000 or treat the two as interchangeable.\\n\\nSource: https://docs.arc.io/arc/concepts/stablecoin-native-model#two-interfaces-one-balance"
               },
-              "helpUri": "https://docs.arc.io/arc/concepts/stablecoin-native-model#usdc-as-the-native-token",
+              "helpUri": "https://docs.arc.io/arc/concepts/stablecoin-native-model#two-interfaces-one-balance",
               "defaultConfiguration": {
                 "level": "warning"
               },

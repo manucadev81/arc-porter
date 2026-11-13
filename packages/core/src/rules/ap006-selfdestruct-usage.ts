@@ -1,4 +1,4 @@
-import { callee, identifierName } from "../ast.js";
+import { assemblyCalls, callee, identifierName } from "../ast.js";
 import type { Rule } from "../finding.js";
 import { DOCS } from "../sources.js";
 
@@ -41,6 +41,13 @@ export const ap006: Rule = {
           message: "selfdestruct follows Arc's native value rules and moves the contract's USDC.",
         });
       }
+    }
+    for (const node of assemblyCalls(context.ast, "selfdestruct")) {
+      matches.push({
+        node,
+        message:
+          "selfdestruct in inline assembly follows Arc's native value rules and moves the contract's USDC.",
+      });
     }
     return matches;
   },

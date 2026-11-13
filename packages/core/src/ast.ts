@@ -85,15 +85,38 @@ export function castArgument(node: AstNode): AstNode | undefined {
   return callArguments(node)[0];
 }
 
+export function isZeroLiteral(node: AstNode | undefined): boolean {
+  const literal = numberLiteral(node);
+  if (literal === undefined) return false;
+  try {
+    return BigInt(literal.replace(/_/g, "")) === 0n;
+  } catch {
+    return false;
+  }
+}
+
 export function isZeroAddress(node: AstNode | undefined): boolean {
   if (!node) return false;
-  const cast = castName(node);
-  if (cast === "address" || cast === "payable") {
-    const inner = castArgument(node);
-    return numberLiteral(inner) === "0" || isZeroAddress(inner);
+  if (node.type === "FunctionCall") {
+    const target = callee(node);
+    const args = callArguments(node);
+    if (!target || args.length !== 1) return false;
+    const isCast =
+      target.type === "ElementaryTypeName" ||
+      (target.type === "Identifier" && /^(address|payable|uint\d*|bytes20)$/.test(String(target.name)));
+    return isCast && isZeroAddress(args[0]);
   }
-  const literal = numberLiteral(node);
-  return literal !== undefined && /^0x0{40}$/i.test(literal);
+  return isZeroLiteral(node);
+}
+
+export function assemblyCalls(root: AstNode, name: string): AstNode[] {
+  const out: AstNode[] = [];
+  const visit = (node: AstNode) => {
+    if (node.type === "AssemblyCall" && node.functionName === name) out.push(node);
+    for (const child of childNodes(node)) visit(child);
+  };
+  visit(root);
+  return out;
 }
 
 export function isThisBalance(node: AstNode | undefined): boolean {

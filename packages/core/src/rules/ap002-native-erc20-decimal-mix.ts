@@ -21,7 +21,7 @@ export const ap002: Rule = {
   title: "Native value and ERC-20 USDC mixed in one function",
   severity: "high",
   confidence: "medium",
-  docUrl: `${DOCS.stablecoinModel}#usdc-as-the-native-token`,
+  docUrl: `${DOCS.stablecoinModel}#two-interfaces-one-balance`,
   sources: [DOCS.stablecoinModel, DOCS.porting, DOCS.evmDifferences],
   description:
     "On Arc msg.value and address.balance are denominated in 18-decimal native USDC, while balanceOf, transfer and transferFrom on the USDC contract use 6 decimals over the same balance. A function that reads or moves both is off by a factor of 10^12 unless it converts.",
@@ -73,7 +73,7 @@ contract Pool {
       const name = typeof fn.name === "string" && fn.name ? fn.name : "this function";
       matches.push({
         node: first.info.node,
-        message: `${name} mixes ${first.kind === "msg.value" ? "msg.value" : "a native .balance"} (18 decimals) with ${token.member} (6 decimals) on the same USDC balance.`,
+        message: `${name} reads native value (${first.kind === "msg.value" ? "msg.value" : ".balance"}, 18 decimals on Arc) and calls ${token.member} on a token in the same function; if that token is USDC, the two views differ by 10^12.`,
       });
     }
     return matches;

@@ -1,4 +1,11 @@
-import { childNodes, classifyCall, isGlobalMember, memberAccess, numberLiteral } from "./ast.js";
+import {
+  childNodes,
+  classifyCall,
+  isAddressCast,
+  isGlobalMember,
+  memberAccess,
+  numberLiteral,
+} from "./ast.js";
 import { applyConfig, type ResolvedConfig } from "./config.js";
 import {
   type AnalysisError,
@@ -13,6 +20,7 @@ import {
   type RuleContext,
   type SuppressedFinding,
 } from "./finding.js";
+import { matchesAny } from "./glob.js";
 import { type ParsedFile, parseSource } from "./parse.js";
 import { DISCLAIMER, SOURCES_VERIFIED_AT } from "./sources.js";
 import { VERSION } from "./version.js";
@@ -53,6 +61,10 @@ function collect(ast: AstNode): Map<string, NodeInfo[]> {
   return buckets;
 }
 
+function isNativeAccount(node: AstNode): boolean {
+  return isAddressCast(node) || isGlobalMember(node, "msg", "sender") || isGlobalMember(node, "tx", "origin");
+}
+
 function buildIndex(buckets: Map<string, NodeInfo[]>): FileIndex {
   const index: FileIndex = { addresses: [], tokenCalls: [], nativeUses: [], hasUsdcAddress: false };
   for (const info of buckets.get("NumberLiteral") ?? []) {
@@ -72,9 +84,7 @@ function buildIndex(buckets: Map<string, NodeInfo[]>): FileIndex {
     if (isGlobalMember(info.node, "msg", "value")) index.nativeUses.push({ info, kind: "msg.value" });
     else {
       const access = memberAccess(info.node);
-      if (access && access.member === "balance" && access.object.type !== "Identifier") {
-        index.nativeUses.push({ info, kind: "balance" });
-      } else if (access && access.member === "balance") {
+      if (access && access.member === "balance" && isNativeAccount(access.object)) {
         index.nativeUses.push({ info, kind: "balance" });
       }
     }
@@ -138,7 +148,9 @@ export function analyze(inputs: SourceInput[], config: ResolvedConfig): Report {
   const findings: Finding[] = [];
   const suppressed: SuppressedFinding[] = [];
   const errors: AnalysisError[] = [];
-  const sorted = [...inputs].sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0));
+  const sorted = inputs
+    .filter((input) => !matchesAny(input.file, config.ignore))
+    .sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0));
   for (const input of sorted) {
     const analysis = analyzeFile(input, config.rules);
     if (analysis.error) errors.push(analysis.error);

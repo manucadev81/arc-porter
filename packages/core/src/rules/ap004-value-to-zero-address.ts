@@ -1,4 +1,4 @@
-import { classifyCall, isZeroAddress, recipientOf } from "../ast.js";
+import { classifyCall, isZeroAddress, isZeroLiteral, recipientOf, sentValueOf } from "../ast.js";
 import type { Rule } from "../finding.js";
 import { DOCS } from "../sources.js";
 
@@ -38,6 +38,7 @@ export const ap004: Rule = {
       if (kind === "other") continue;
       const recipient = recipientOf(node);
       if (!isZeroAddress(recipient)) continue;
+      if (kind === "native-send" && isZeroLiteral(sentValueOf(node))) continue;
       matches.push({
         node,
         message:

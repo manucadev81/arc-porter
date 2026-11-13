@@ -1,4 +1,4 @@
-import { callee, identifierName, isGlobalMember } from "../ast.js";
+import { assemblyCalls, callee, identifierName, isGlobalMember } from "../ast.js";
 import type { Rule } from "../finding.js";
 import { DOCS } from "../sources.js";
 
@@ -38,6 +38,12 @@ export const ap011: Rule = {
       if (isGlobalMember(node, "block", "blobbasefee")) {
         matches.push({ node, message: "block.blobbasefee always returns 1 on Arc." });
       }
+    }
+    for (const node of assemblyCalls(context.ast, "blobhash")) {
+      matches.push({ node, message: "blobhash() in inline assembly always returns 0 on Arc." });
+    }
+    for (const node of assemblyCalls(context.ast, "blobbasefee")) {
+      matches.push({ node, message: "blobbasefee() in inline assembly always returns 1 on Arc." });
     }
     return matches;
   },

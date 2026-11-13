@@ -61,11 +61,15 @@ export function validateConfig(raw: unknown, knownRuleIds: readonly string[]): C
     if (!isRecord(raw.rules)) errors.push('"rules" must be an object keyed by rule id');
     else {
       const rules: Record<string, RuleSetting> = {};
-      for (const [id, setting] of Object.entries(raw.rules)) {
-        if (!knownRuleIds.includes(id)) errors.push(`"rules.${id}": unknown rule`);
-        if (setting === "on" || setting === "off" || (SEVERITIES as string[]).includes(String(setting))) {
+      for (const [rawId, setting] of Object.entries(raw.rules)) {
+        const id = rawId.toUpperCase();
+        if (!knownRuleIds.includes(id)) errors.push(`"rules.${rawId}": unknown rule`);
+        if (
+          typeof setting === "string" &&
+          (setting === "on" || setting === "off" || (SEVERITIES as string[]).includes(setting))
+        ) {
           rules[id] = setting as RuleSetting;
-        } else errors.push(`"rules.${id}" must be "on", "off", "low", "medium" or "high"`);
+        } else errors.push(`"rules.${rawId}" must be "on", "off", "low", "medium" or "high"`);
       }
       config.rules = rules;
     }
@@ -81,7 +85,7 @@ export function validateConfig(raw: unknown, knownRuleIds: readonly string[]): C
           errors.push(`${where} must be an object`);
           return;
         }
-        const rule = entry.rule;
+        const rule = typeof entry.rule === "string" ? entry.rule.toUpperCase() : entry.rule;
         const file = entry.file;
         const reason = entry.reason;
         const line = entry.line;

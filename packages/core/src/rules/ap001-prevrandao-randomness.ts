@@ -1,4 +1,4 @@
-import { isGlobalMember } from "../ast.js";
+import { assemblyCalls, isGlobalMember } from "../ast.js";
 import type { Rule } from "../finding.js";
 import { DOCS } from "../sources.js";
 
@@ -43,6 +43,11 @@ contract Raffle {
           node,
           message: "block.difficulty maps to PREVRANDAO, which always returns 0 on Arc.",
         });
+      }
+    }
+    for (const name of ["prevrandao", "difficulty"]) {
+      for (const node of assemblyCalls(context.ast, name)) {
+        matches.push({ node, message: `${name}() in inline assembly always returns 0 on Arc.` });
       }
     }
     return matches;

@@ -23,9 +23,9 @@ export const ap007: Rule = {
   docUrl: `${DOCS.porting}#steps`,
   sources: [DOCS.porting, DOCS.stablecoinModel, DOCS.contractAddresses],
   description:
-    "Arc's native asset already exposes an ERC-20 interface, so there is no wrapped native token and no WUSDC. Code that names WETH or WUSDC, or wraps with deposit{value:} and unwraps with withdraw(), carries a step that does not exist on Arc and fragments liquidity if deployed.",
+    "Arc's native asset already exposes an ERC-20 interface, so there is no wrapped native token and no WUSDC. Code that names WETH, IWETH or WUSDC, or wraps with deposit{value:} and unwraps with withdraw(), usually carries a wrap step that does not exist on Arc. A WETH reference can also be the bridged WETH ERC-20 that Arc lists on its contract addresses page; that one is a plain token and is fine.",
   suggestion:
-    "Replace the WETH constant with the USDC ERC-20 address 0x3600000000000000000000000000000000000000 and remove deposit() and withdraw() wrap calls.",
+    "If this wraps the native asset, replace it with the USDC ERC-20 address 0x3600000000000000000000000000000000000000 and remove deposit() and withdraw() wrap calls. If it is Arc's bridged WETH used as an ordinary ERC-20, suppress this finding with that reason.",
   badExample: `interface IWETH {
     function deposit() external payable;
     function withdraw(uint256) external;
@@ -66,7 +66,7 @@ contract Router {
       for (const { node } of context.nodes(type)) {
         const name = nameOf(node);
         if (name && WRAPPED.test(name))
-          push(node, `${name} refers to a wrapped native token, which Arc does not have.`);
+          push(node, `${name} names a wrapped native token; Arc has none, only a bridged WETH ERC-20.`);
       }
     }
     if (matches.length === 0) {

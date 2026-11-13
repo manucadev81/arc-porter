@@ -11,7 +11,7 @@ export const ap005: Rule = {
   docUrl: `${DOCS.porting}#steps`,
   sources: [DOCS.porting, DOCS.evmDifferences],
   description:
-    "On Arc a USDC transfer can revert even when the sender has the balance: the recipient may be blocklisted, the zero address or a self-destructed account. A loop that pushes value to several recipients fails for everyone when one of them reverts.",
+    "On Arc a USDC transfer can revert even when the sender has the balance: the recipient may be blocklisted, the zero address or a self-destructed account. A loop that pushes value to several recipients fails for everyone when one of them reverts. This rule is derived from the value-transfer and revert-path steps of the porting guide; the guide does not name loops explicitly.",
   suggestion:
     "Credit each recipient in storage and let them withdraw individually, so one address that cannot receive USDC does not block the others.",
   badExample: `contract Splitter {

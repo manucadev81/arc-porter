@@ -6,15 +6,15 @@ export const NATIVE_SENTINEL = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 export const ap008: Rule = {
   id: "AP008",
   name: "native-asset-sentinel",
-  title: "EIP-7528 native-asset sentinel must not alias Arc's USDC",
+  title: "EIP-7528 native-asset sentinel must not be aliased to Arc's USDC",
   severity: "medium",
   confidence: "high",
-  docUrl: `${DOCS.stablecoinModel}#usdc-as-the-native-token`,
+  docUrl: `${DOCS.stablecoinModel}#two-interfaces-one-balance`,
   sources: [DOCS.stablecoinModel, DOCS.porting],
   description:
-    "DeFi SDKs use 0xEeee...EEeE as a stand-in for native ETH in routing tables. On Arc the native asset is USDC and already has an ERC-20 interface, so aliasing the sentinel to the USDC address conflates native value transfers with ERC-20 transfers.",
+    "DeFi SDKs use 0xEeee...EEeE as a stand-in for the native asset in routing tables. Arc's docs say not to alias that sentinel to the USDC ERC-20 address 0x3600...0000: the two interfaces move the same balance with different decimals, so treating the sentinel as another name for USDC conflates native value transfers with ERC-20 transfers.",
   suggestion:
-    "Use the USDC ERC-20 address 0x3600000000000000000000000000000000000000 directly instead of a native-asset sentinel.",
+    "Keep the sentinel for native value paths only; never map it to 0x3600000000000000000000000000000000000000 or treat the two as interchangeable.",
   badExample: `contract Router {
     address constant NATIVE = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 

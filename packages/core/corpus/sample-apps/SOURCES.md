@@ -1,7 +1,7 @@
 # Arc sample applications - Solidity corpus sources
 
 Collected 2026-11-13 from the apps listed at https://docs.arc.io/arc/references/sample-applications.
-Each repo was shallow-cloned (`git clone --depth 1`) into `/Users/manoellucio/OpenBot/Shared/arc-porter/external/<repo-name>`.
+Each repo was shallow-cloned (`git clone --depth 1`) into a local clone outside this repository.
 Only `.sol` files were copied into this directory (relative paths preserved; `node_modules`, `lib`, `out`, `cache`, `artifacts` skipped).
 All 12 repos ship a `LICENSE` file containing the Apache License, Version 2.0.
 
