@@ -1,0 +1,576 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`json report > matches the snapshot 1`] = `
+"{
+  "tool": {
+    "name": "arc-porter",
+    "version": "0.1.0"
+  },
+  "sourcesVerifiedAt": "2026-11-13",
+  "disclaimer": "Arc Porter is not an audit. The analysis is syntactic: it can miss problems and raise false alarms. It complements arc-forge tests and a security review; it replaces neither.",
+  "summary": {
+    "files": 4,
+    "high": 1,
+    "medium": 2,
+    "low": 0,
+    "suppressed": 1
+  },
+  "findings": [
+    {
+      "ruleId": "AP001",
+      "severity": "high",
+      "confidence": "high",
+      "file": "AP001/bad/Raffle.sol",
+      "line": 11,
+      "column": 57,
+      "snippet": "uint256 at = uint256(keccak256(abi.encodePacked(block.prevrandao, players.length))) % players.length;",
+      "message": "block.prevrandao always returns 0 on Arc.",
+      "suggestion": "Use a verifiable random function or a randomness oracle instead of block.prevrandao.",
+      "docUrl": "https://docs.arc.io/arc/references/evm-differences#execution-and-opcode-differences"
+    },
+    {
+      "ruleId": "AP005",
+      "severity": "medium",
+      "confidence": "high",
+      "file": "AP005/bad/LoopSplitter.sol",
+      "line": 17,
+      "column": 13,
+      "snippet": "to[i].transfer(part);",
+      "message": "Native transfer inside a loop: one blocked recipient reverts the whole batch.",
+      "suggestion": "Credit each recipient in storage and let them withdraw individually, so one address that cannot receive USDC does not block the others.",
+      "docUrl": "https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps"
+    },
+    {
+      "ruleId": "AP005",
+      "severity": "medium",
+      "confidence": "high",
+      "file": "AP005/bad/LoopSplitter.sol",
+      "line": 25,
+      "column": 27,
+      "snippet": "(bool ok, ) = to[i].call{value: part}(\\"\\");",
+      "message": "Native call inside a loop: one blocked recipient reverts the whole batch.",
+      "suggestion": "Credit each recipient in storage and let them withdraw individually, so one address that cannot receive USDC does not block the others.",
+      "docUrl": "https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps"
+    }
+  ],
+  "suppressed": [
+    {
+      "ruleId": "AP005",
+      "severity": "medium",
+      "confidence": "high",
+      "file": "AP005/bad/LoopSplitter.sol",
+      "line": 33,
+      "column": 13,
+      "snippet": "usdc.transfer(to[i], amount);",
+      "message": "USDC transfer inside a loop: one blocked recipient reverts the whole batch.",
+      "suggestion": "Credit each recipient in storage and let them withdraw individually, so one address that cannot receive USDC does not block the others.",
+      "docUrl": "https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps",
+      "reason": "Token path is reviewed"
+    }
+  ],
+  "errors": [
+    {
+      "file": "broken.sol",
+      "message": "line 2, column 10: missing {'from', 'layout', 'at', 'error', 'address', 'calldata', 'revert', 'callback', 'leave', 'payable', 'global', 'constructor', 'receive', Identifier} at '{'"
+    }
+  ]
+}
+"
+`;
+
+exports[`sarif report > matches the snapshot 1`] = `
+"{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "arc-porter",
+          "version": "0.1.0",
+          "informationUri": "https://github.com/manucadev81/arc-porter",
+          "rules": [
+            {
+              "id": "AP001",
+              "name": "prevrandao-randomness",
+              "shortDescription": {
+                "text": "block.prevrandao is always 0 on Arc"
+              },
+              "fullDescription": {
+                "text": "On Arc the PREVRANDAO opcode always returns 0, so block.prevrandao (and its legacy alias block.difficulty) never carries randomness. Lotteries, shuffles and relay selection built on it always get the same value."
+              },
+              "help": {
+                "text": "Use a verifiable random function or a randomness oracle instead of block.prevrandao.\\n\\nSource: https://docs.arc.io/arc/references/evm-differences#execution-and-opcode-differences"
+              },
+              "helpUri": "https://docs.arc.io/arc/references/evm-differences#execution-and-opcode-differences",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "AP002",
+              "name": "native-erc20-decimal-mix",
+              "shortDescription": {
+                "text": "Native value and ERC-20 USDC mixed in one function"
+              },
+              "fullDescription": {
+                "text": "On Arc msg.value and address.balance are denominated in 18-decimal native USDC, while balanceOf, transfer and transferFrom on the USDC contract use 6 decimals over the same balance. A function that reads or moves both is off by a factor of 10^12 unless it converts."
+              },
+              "help": {
+                "text": "Pick one interface per function. If both are needed, convert explicitly: native = erc20 * 10**12, and never compare or add raw values.\\n\\nSource: https://docs.arc.io/arc/concepts/stablecoin-native-model#usdc-as-the-native-token"
+              },
+              "helpUri": "https://docs.arc.io/arc/concepts/stablecoin-native-model#usdc-as-the-native-token",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "8.0",
+                "precision": "medium"
+              }
+            },
+            {
+              "id": "AP003",
+              "name": "usdc-18-decimals",
+              "shortDescription": {
+                "text": "Arc USDC scaled as an 18-decimal token"
+              },
+              "fullDescription": {
+                "text": "The USDC ERC-20 interface at 0x3600000000000000000000000000000000000000 uses 6 decimals. A file that hard-codes that address and also scales amounts by 1e18, 10**18 or the ether unit is very likely treating USDC like an 18-decimal token."
+              },
+              "help": {
+                "text": "Scale USDC amounts by 1e6 (or read decimals() at runtime) when using the ERC-20 interface; reserve 1e18 for native value only.\\n\\nSource: https://docs.arc.io/arc/references/contract-addresses#usdc"
+              },
+              "helpUri": "https://docs.arc.io/arc/references/contract-addresses#usdc",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "8.0",
+                "precision": "medium"
+              }
+            },
+            {
+              "id": "AP004",
+              "name": "value-to-zero-address",
+              "shortDescription": {
+                "text": "Value sent to address(0) reverts on Arc"
+              },
+              "fullDescription": {
+                "text": "A value-bearing transfer to the zero address reverts on Arc with \\"Zero address not allowed\\". Because USDC is the native asset and the ERC-20 interface moves the same balance, sending tokens to address(0) as a burn also fails."
+              },
+              "help": {
+                "text": "Never send value or USDC to address(0). To retire funds, send them to an address you control and account for them there.\\n\\nSource: https://docs.arc.io/arc/references/evm-differences#value-transfer-rules"
+              },
+              "helpUri": "https://docs.arc.io/arc/references/evm-differences#value-transfer-rules",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "AP005",
+              "name": "push-payment-loop",
+              "shortDescription": {
+                "text": "Transfer inside a loop can be blocked by one recipient"
+              },
+              "fullDescription": {
+                "text": "On Arc a USDC transfer can revert even when the sender has the balance: the recipient may be blocklisted, the zero address or a self-destructed account. A loop that pushes value to several recipients fails for everyone when one of them reverts."
+              },
+              "help": {
+                "text": "Credit each recipient in storage and let them withdraw individually, so one address that cannot receive USDC does not block the others.\\n\\nSource: https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps"
+              },
+              "helpUri": "https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "5.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "AP006",
+              "name": "selfdestruct-usage",
+              "shortDescription": {
+                "text": "selfdestruct moves USDC and reverts in several cases on Arc"
+              },
+              "fullDescription": {
+                "text": "On Arc a contract's USDC is its native balance, so selfdestruct transfers that USDC to the beneficiary. It reverts when the beneficiary is the contract itself, the zero address, a blocklisted address or an account that already self-destructed, and any later non-zero-value call to the destructed account reverts."
+              },
+              "help": {
+                "text": "Remove selfdestruct. Move funds out with an explicit withdrawal and disable the contract with a flag.\\n\\nSource: https://docs.arc.io/arc/references/evm-differences#selfdestruct"
+              },
+              "helpUri": "https://docs.arc.io/arc/references/evm-differences#selfdestruct",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "8.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "AP007",
+              "name": "wrapped-native-pattern",
+              "shortDescription": {
+                "text": "WETH-style wrapper has no place on Arc"
+              },
+              "fullDescription": {
+                "text": "Arc's native asset already exposes an ERC-20 interface, so there is no wrapped native token and no WUSDC. Code that names WETH or WUSDC, or wraps with deposit{value:} and unwraps with withdraw(), carries a step that does not exist on Arc and fragments liquidity if deployed."
+              },
+              "help": {
+                "text": "Replace the WETH constant with the USDC ERC-20 address 0x3600000000000000000000000000000000000000 and remove deposit() and withdraw() wrap calls.\\n\\nSource: https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps"
+              },
+              "helpUri": "https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "5.0",
+                "precision": "medium"
+              }
+            },
+            {
+              "id": "AP008",
+              "name": "native-asset-sentinel",
+              "shortDescription": {
+                "text": "EIP-7528 native-asset sentinel must not alias Arc's USDC"
+              },
+              "fullDescription": {
+                "text": "DeFi SDKs use 0xEeee...EEeE as a stand-in for native ETH in routing tables. On Arc the native asset is USDC and already has an ERC-20 interface, so aliasing the sentinel to the USDC address conflates native value transfers with ERC-20 transfers."
+              },
+              "help": {
+                "text": "Use the USDC ERC-20 address 0x3600000000000000000000000000000000000000 directly instead of a native-asset sentinel.\\n\\nSource: https://docs.arc.io/arc/concepts/stablecoin-native-model#usdc-as-the-native-token"
+              },
+              "helpUri": "https://docs.arc.io/arc/concepts/stablecoin-native-model#usdc-as-the-native-token",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "5.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "AP009",
+              "name": "native-balance-sweep",
+              "shortDescription": {
+                "text": "Native sweep in a contract that also holds ERC-20 USDC"
+              },
+              "fullDescription": {
+                "text": "On Arc the ERC-20 USDC a contract holds is its native balance. A function that sends address(this).balance also moves the users' ERC-20 USDC, so a contract that handles tokens must not sweep its native balance."
+              },
+              "help": {
+                "text": "Track what the contract owes in storage and transfer only the surplus, or remove the sweep from contracts that custody ERC-20 USDC.\\n\\nSource: https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps"
+              },
+              "helpUri": "https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "8.0",
+                "precision": "medium"
+              }
+            },
+            {
+              "id": "AP010",
+              "name": "zero-balance-check",
+              "shortDescription": {
+                "text": "balanceOf() == 0 does not mean the balance is empty"
+              },
+              "fullDescription": {
+                "text": "The ERC-20 balanceOf on Arc truncates anything below 1e-6 USDC, so it reads 0 while the native balance still holds dust. Logic that treats balanceOf(...) == 0 as \\"empty\\" can be wrong."
+              },
+              "help": {
+                "text": "Compare against the amount you need (balanceOf(x) >= amount) or read the native balance when exactness matters.\\n\\nSource: https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps"
+              },
+              "helpUri": "https://docs.arc.io/arc/tutorials/porting-contracts-to-arc#steps",
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "2.0",
+                "precision": "low"
+              }
+            },
+            {
+              "id": "AP011",
+              "name": "blob-opcodes",
+              "shortDescription": {
+                "text": "Blob opcodes return fixed values on Arc"
+              },
+              "fullDescription": {
+                "text": "Arc does not support blob transactions. BLOBHASH always returns 0 and BLOBBASEFEE always returns 1, so code that reads blobhash(i) or block.blobbasefee gets constants instead of chain data."
+              },
+              "help": {
+                "text": "Remove the dependency on blob data; Arc rejects type-3 transactions at the mempool.\\n\\nSource: https://docs.arc.io/arc/references/evm-differences#execution-and-opcode-differences"
+              },
+              "helpUri": "https://docs.arc.io/arc/references/evm-differences#execution-and-opcode-differences",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "5.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "AP012",
+              "name": "beacon-roots",
+              "shortDescription": {
+                "text": "The EIP-4788 beacon-roots contract is absent on Arc"
+              },
+              "fullDescription": {
+                "text": "Arc omits the EIP-4788 beacon-roots contract, so calls to 0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02 return empty data. Anything that treats it as an oracle or a randomness source gets nothing back."
+              },
+              "help": {
+                "text": "Drop the beacon-roots dependency. The EIP-2935 block-hash history contract is deployed on Arc if you need past block hashes.\\n\\nSource: https://docs.arc.io/arc/references/evm-differences#execution-and-opcode-differences"
+              },
+              "helpUri": "https://docs.arc.io/arc/references/evm-differences#execution-and-opcode-differences",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "5.0",
+                "precision": "high"
+              }
+            },
+            {
+              "id": "AP013",
+              "name": "timestamp-strict-ordering",
+              "shortDescription": {
+                "text": "block.timestamp may repeat across blocks on Arc"
+              },
+              "fullDescription": {
+                "text": "Arc produces sub-second blocks with one-second timestamp granularity, so consecutive blocks can share a timestamp. Requiring block.timestamp to be strictly greater than the last recorded timestamp can reject a later block."
+              },
+              "help": {
+                "text": "Order by block.number, or compare with >= when a repeated timestamp is acceptable.\\n\\nSource: https://docs.arc.io/arc/references/evm-differences#fee-market-and-block-behavior"
+              },
+              "helpUri": "https://docs.arc.io/arc/references/evm-differences#fee-market-and-block-behavior",
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": [
+                  "arc",
+                  "portability"
+                ],
+                "security-severity": "2.0",
+                "precision": "low"
+              }
+            }
+          ],
+          "properties": {
+            "sourcesVerifiedAt": "2026-11-13",
+            "disclaimer": "Arc Porter is not an audit. The analysis is syntactic: it can miss problems and raise false alarms. It complements arc-forge tests and a security review; it replaces neither."
+          }
+        }
+      },
+      "results": [
+        {
+          "ruleId": "AP001",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "block.prevrandao always returns 0 on Arc. Use a verifiable random function or a randomness oracle instead of block.prevrandao."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "AP001/bad/Raffle.sol",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 11,
+                  "startColumn": 57,
+                  "snippet": {
+                    "text": "uint256 at = uint256(keccak256(abi.encodePacked(block.prevrandao, players.length))) % players.length;"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "confidence": "high",
+            "severity": "high"
+          }
+        },
+        {
+          "ruleId": "AP005",
+          "ruleIndex": 4,
+          "level": "warning",
+          "message": {
+            "text": "Native transfer inside a loop: one blocked recipient reverts the whole batch. Credit each recipient in storage and let them withdraw individually, so one address that cannot receive USDC does not block the others."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "AP005/bad/LoopSplitter.sol",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 17,
+                  "startColumn": 13,
+                  "snippet": {
+                    "text": "to[i].transfer(part);"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "confidence": "high",
+            "severity": "medium"
+          }
+        },
+        {
+          "ruleId": "AP005",
+          "ruleIndex": 4,
+          "level": "warning",
+          "message": {
+            "text": "Native call inside a loop: one blocked recipient reverts the whole batch. Credit each recipient in storage and let them withdraw individually, so one address that cannot receive USDC does not block the others."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "AP005/bad/LoopSplitter.sol",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 25,
+                  "startColumn": 27,
+                  "snippet": {
+                    "text": "(bool ok, ) = to[i].call{value: part}(\\"\\");"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "confidence": "high",
+            "severity": "medium"
+          }
+        },
+        {
+          "ruleId": "AP005",
+          "ruleIndex": 4,
+          "level": "warning",
+          "message": {
+            "text": "USDC transfer inside a loop: one blocked recipient reverts the whole batch. Credit each recipient in storage and let them withdraw individually, so one address that cannot receive USDC does not block the others."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "AP005/bad/LoopSplitter.sol",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 33,
+                  "startColumn": 13,
+                  "snippet": {
+                    "text": "usdc.transfer(to[i], amount);"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "confidence": "high",
+            "severity": "medium"
+          },
+          "suppressions": [
+            {
+              "kind": "external",
+              "justification": "Token path is reviewed"
+            }
+          ]
+        }
+      ],
+      "invocations": [
+        {
+          "executionSuccessful": false,
+          "toolExecutionNotifications": [
+            {
+              "level": "error",
+              "message": {
+                "text": "line 2, column 10: missing {'from', 'layout', 'at', 'error', 'address', 'calldata', 'revert', 'callback', 'leave', 'payable', 'global', 'constructor', 'receive', Identifier} at '{'"
+              },
+              "locations": [
+                {
+                  "physicalLocation": {
+                    "artifactLocation": {
+                      "uri": "broken.sol",
+                      "uriBaseId": "%SRCROOT%"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+"
+`;
