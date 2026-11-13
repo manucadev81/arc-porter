@@ -7,5 +7,7 @@ export default defineConfig({
   clean: true,
   target: "node20",
   noExternal: ["@arc-porter/core"],
-  banner: { js: "#!/usr/bin/env node" },
+  banner: {
+    js: '#!/usr/bin/env node\nimport { createRequire } from "node:module";\nconst require = createRequire(import.meta.url);',
+  },
 });

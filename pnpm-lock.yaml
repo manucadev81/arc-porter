@@ -26,6 +26,9 @@ importers:
       '@arc-porter/core':
         specifier: workspace:*
         version: link:../core
+      '@solidity-parser/parser':
+        specifier: ^0.20.2
+        version: 0.20.2
       commander:
         specifier: ^15.1.0
         version: 15.1.0
