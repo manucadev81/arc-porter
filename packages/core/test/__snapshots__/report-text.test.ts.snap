@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`text report > matches the snapshot without color 1`] = `
+"arc-porter 0.1.0  4 file(s) analyzed
+
+HIGH AP001 block.prevrandao always returns 0 on Arc.
+  AP001/bad/Raffle.sol:11:57  confidence high
+  uint256 at = uint256(keccak256(abi.encodePacked(block.prevrandao, players.length))) % players.length;
+  Suggestion: Use a verifiable random function or a randomness oracle instead of block.prevrandao.
+  Docs: https://docs.arc.io/arc/references/evm-differences#execution-and-opcode-differences
+
+HIGH AP004 Native value sent to address(0) reverts on Arc.
+  AP004/bad/BurnByTransfer.sol:16:9  confidence high
+  payable(address(0)).transfer(msg.value);
+  Suggestion: Never send value or USDC to address(0). To retire funds, send them to an address you control and account for them there.
+  Docs: https://docs.arc.io/arc/references/evm-differences#value-transfer-rules
+
+HIGH AP004 Native value sent to address(0) reverts on Arc.
+  AP004/bad/BurnByTransfer.sol:20:23  confidence high
+  (bool ok, ) = address(0).call{value: msg.value}("");
+  Suggestion: Never send value or USDC to address(0). To retire funds, send them to an address you control and account for them there.
+  Docs: https://docs.arc.io/arc/references/evm-differences#value-transfer-rules
+
+HIGH AP004 USDC transferred to address(0) reverts on Arc, because the ERC-20 interface moves the native balance.
+  AP004/bad/BurnByTransfer.sol:25:9  confidence high
+  usdc.transfer(address(0), amount);
+  Suggestion: Never send value or USDC to address(0). To retire funds, send them to an address you control and account for them there.
+  Docs: https://docs.arc.io/arc/references/evm-differences#value-transfer-rules
+
+HIGH AP004 USDC transferred to address(0) reverts on Arc, because the ERC-20 interface moves the native balance.
+  AP004/bad/BurnByTransfer.sol:29:9  confidence high
+  usdc.transferFrom(from, address(0), amount);
+  Suggestion: Never send value or USDC to address(0). To retire funds, send them to an address you control and account for them there.
+  Docs: https://docs.arc.io/arc/references/evm-differences#value-transfer-rules
+
+Errors
+  broken.sol: line 2, column 10: missing {'from', 'layout', 'at', 'error', 'address', 'calldata', 'revert', 'callback', 'leave', 'payable', 'global', 'constructor', 'receive', Identifier} at '{'
+
+Summary: 5 high, 0 medium, 0 low, 1 file(s) not analyzed
+Sources verified on 2026-11-13.
+Arc Porter is not an audit. The analysis is syntactic: it can miss problems and raise false alarms. It complements arc-forge tests and a security review; it replaces neither.
+"
+`;
