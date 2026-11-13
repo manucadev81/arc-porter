@@ -62,17 +62,26 @@ contract Router {
       seenLines.add(line);
       matches.push({ node, message });
     };
-    for (const type of [
-      "ContractDefinition",
-      "UserDefinedTypeName",
-      "Identifier",
-      "VariableDeclaration",
-      "ImportDirective",
-    ]) {
+    for (const type of ["ContractDefinition", "VariableDeclaration", "ImportDirective"]) {
       for (const { node } of context.nodes(type)) {
         const name = nameOf(node);
         if (name && WRAPPED.test(name))
           push(node, `${name} refers to a wrapped native token, which Arc does not have.`);
+      }
+    }
+    if (matches.length === 0) {
+      for (const type of ["UserDefinedTypeName", "Identifier"]) {
+        const first = context.nodes(type).find(({ node }) => {
+          const name = nameOf(node);
+          return name !== undefined && WRAPPED.test(name);
+        });
+        if (first) {
+          push(
+            first.node,
+            `${nameOf(first.node)} refers to a wrapped native token, which Arc does not have.`,
+          );
+          break;
+        }
       }
     }
     let deposit: AstNode | undefined;
