@@ -8,7 +8,11 @@ import { describe, expect, it } from "vitest";
 const bin = fileURLToPath(new URL("../dist/main.js", import.meta.url));
 const fixtures = fileURLToPath(new URL("../../core/fixtures/", import.meta.url));
 
-describe.skipIf(!existsSync(bin))("built binary", () => {
+describe("built binary", () => {
+  it("is built before the tests run", () => {
+    expect(existsSync(bin), "run pnpm build before pnpm test").toBe(true);
+  });
+
   it("prints the version and help", () => {
     expect(execFileSync("node", [bin, "--version"], { encoding: "utf8" }).trim()).toMatch(/^\d+\.\d+\.\d+$/);
     expect(execFileSync("node", [bin, "--help"], { encoding: "utf8" })).toContain("check");

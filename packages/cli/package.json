@@ -18,13 +18,26 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@arc-porter/core": "workspace:*",
     "@solidity-parser/parser": "^0.20.2",
     "commander": "^15.1.0",
-    "fast-glob": "^3.3.3",
-    "picocolors": "^1.1.1"
+    "fast-glob": "^3.3.3"
   },
   "devDependencies": {
-    "tsup": "^9.0.0"
-  }
+    "tsup": "^9.0.0",
+    "@arc-porter/core": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manucadev81/arc-porter.git",
+    "directory": "packages/cli"
+  },
+  "keywords": [
+    "arc",
+    "solidity",
+    "static-analysis",
+    "usdc",
+    "circle",
+    "linter"
+  ],
+  "homepage": "https://github.com/manucadev81/arc-porter#readme"
 }

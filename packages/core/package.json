@@ -28,5 +28,20 @@
   "devDependencies": {
     "ajv": "^8.20.0",
     "tsup": "^9.0.0"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manucadev81/arc-porter.git",
+    "directory": "packages/core"
+  },
+  "keywords": [
+    "arc",
+    "solidity",
+    "static-analysis",
+    "usdc",
+    "circle"
+  ]
 }

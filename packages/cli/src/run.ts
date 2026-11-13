@@ -2,7 +2,6 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
 import {
   analyze,
-  DEFAULT_IGNORE,
   defaultConfig,
   findRule,
   meetsThreshold,
@@ -85,11 +84,7 @@ export function check(options: CheckOptions): CheckOutcome {
   }
   const config = loadConfig(options.config, options.cwd);
   const failOn = options.failOn ?? config.failOn;
-  const files = discoverFiles(
-    options.paths,
-    config.ignore.length ? config.ignore : DEFAULT_IGNORE,
-    options.cwd,
-  );
+  const files = discoverFiles(options.paths, config.ignore, options.cwd);
   const inputs = files.map((file) => ({ file, source: readFileSync(resolve(options.cwd, file), "utf8") }));
   const report = analyze(inputs, { ...config, failOn });
   const text = render(report, options.format, options.color && options.format === "text");

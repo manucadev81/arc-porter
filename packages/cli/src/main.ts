@@ -31,7 +31,10 @@ export function buildProgram(io: { stdout: (s: string) => void; stderr: (s: stri
           ...(opts.failOn === undefined ? {} : { failOn: opts.failOn as "low" | "medium" | "high" }),
           ...(opts.config === undefined ? {} : { config: opts.config }),
           ...(opts.output === undefined ? {} : { output: opts.output }),
-          color: opts.color && process.stdout.isTTY === true,
+          color:
+            opts.color &&
+            process.env.NO_COLOR === undefined &&
+            (process.env.FORCE_COLOR !== undefined || process.stdout.isTTY === true),
           cwd: process.cwd(),
         });
         if (outcome.stdout) io.stdout(outcome.stdout);

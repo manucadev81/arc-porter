@@ -1,7 +1,15 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.6.7/schema.json",
   "files": {
-    "includes": ["**", "!**/dist", "!**/node_modules", "!**/fixtures", "!**/corpus", "!**/__snapshots__", "!**/*.md"]
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/node_modules",
+      "!**/fixtures",
+      "!**/corpus",
+      "!**/__snapshots__",
+      "!**/*.md"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -12,7 +20,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noExplicitAny": "error"
       },
